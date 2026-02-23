@@ -20,6 +20,14 @@ enum Role{
   USER
   ADMIN
 }
+enum{
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+
+}
 model User{
   id  String @id @default(uuid())
   email String @unique
@@ -40,11 +48,58 @@ model User{
   @@index([email])
   @@map("users") //table name is users
 
+}
 
+model Product {
+  id String @id @default(uuid())
+  name String
+  description String?
+  price Decimal @db.Decimal(10,2)
+  stock Int @default(0)
+  sku String @unique
+  imageUrl String?
+  isActive Boolean @default(true)
+
+  //Relations
+  orderItems OrderItem[]
+  cartItems cartItem[]
+
+  categoryId String
+  category category @relation(feilds: [categoryId], references: [id])
+
+  //Time
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sku])
+  @@index([categoryId])
+  @@index([isActive])
+  @@map("products")
+
+
+}
+
+model Category{
+   id String @id @default(uuid())
+   products Product[]
+}
+
+model cartItem{
+  id String @id @default(uuid())
+  procutId string
+  product product @relatoin (fields: [prodctId], references: [id])
+}
+
+model OrderItem{
+  id String @id @default(uuid())
+  procutId String
+  product product @relatoin (fields: [prodctId], references: [id])
 }
 
 model Order{
   id String @id @default(uuid())
+  orderNumber String @unique @default(uuid())
+  status OrderStatus
   userId String
   user User @relation(fields: [userID], references: [id], onDelete: Cascade)
 
